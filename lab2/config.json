@@ -1,10 +1,10 @@
 {
     "screen_width": 800,
     "screen_height": 600,
-    "min_speed": 10,
-    "max_speed": 50,
+    "min_speed": 20,
+    "max_speed": 100,
     "min_size": 5,
     "max_size": 20,
     "spawn_rate": 100,
-    "update_interval": 50
+    "update_interval": 20
 }
