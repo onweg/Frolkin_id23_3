@@ -18,7 +18,7 @@ class Drop:
         self.y += self.speed
 
     def draw(self, canvas):
-        canvas.create_rectangle(self.x, self.y, self.x + self.size / 5, self.y + self.size, fill = self.color, outline=self.color)
+        canvas.create_rectangle(self.x, self.y, self.x + self.size / 5, self.y + self.size, fill=self.color, outline=self.color)
 
     def is_out_of_bounds(self, screen_width):
         return self.y > screen_width
@@ -38,13 +38,23 @@ class Cloud:
     def draw(self, canvas):
         outline_color = "blue" if self.selected else "black"
         if self.shape == "rectangle":
-            canvas.create_rectangle(self.x, self.y, self.x + self.width, self.y + self.height, fill = self.color, outline = outline_color)
+            canvas.create_rectangle(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.color, outline=outline_color)
         elif self.shape == "oval":
             canvas.create_oval(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.color, outline=outline_color)
         elif self.shape == "pooh":
+            ball_width = self.width * 0.6
+            ball_height = self.height * 0.6
+            
+            canvas.create_oval(self.x - ball_width * 0.5, self.y + self.height * 0.2,
+                               self.x + ball_width * 0.5, self.y + self.height * 0.3 + ball_height,
+                               fill=self.color, outline=outline_color)
+                               
+            canvas.create_oval(self.x + self.width - ball_width * 0.5, self.y + self.height * 0.2,
+                               self.x + self.width + ball_width * 0.5, self.y + self.height * 0.3 + ball_height,
+                               fill=self.color, outline=outline_color)
             canvas.create_oval(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.color, outline=outline_color)
-            canvas.create_oval(self.x + self.width * 0.2, self.y - self.height * 0.4, self.x + self.width * 0.5, self.y, fill=self.color, outline=outline_color)
-            canvas.create_oval(self.x + self.width * 0.5, self.y - self.height * 0.4, self.x + self.width * 0.8, self.y, fill=self.color, outline=outline_color)
+            
+            
         for drop in self.drops:
             drop.draw(canvas)
             
@@ -57,7 +67,7 @@ class Cloud:
 
         if random.random() < self.drop_params["spawn_rate"]:
             x = random.uniform(self.x, self.x + self.width)
-            y = self.y + self.height
+            y = self.y + self.height * 0.6
             speed = random.uniform(self.drop_params["min_speed"], self.drop_params["max_speed"])
             size = random.uniform(self.drop_params["min_size"], self.drop_params["max_size"])
             color = size_to_color(size, self.drop_params["min_size"], self.drop_params["max_size"])
@@ -69,77 +79,88 @@ class Cloud:
             drop.move()
         self.drops = [drop for drop in self.drops if not drop.is_out_of_bounds(screen_width)]
 
-def add_cloud(x, y, width, height, shape, drop_params, root):
-    x_tmp = int(x.get())
-    y_tmp = int(y.get())
-    width_tmp = int(width.get())
-    height_tmp = int(height.get())
-    shape_tmp = shape.get()
+def add_cloud(entry_x, entry_y, entry_width, entry_height, shape_var, entry_spawn_rate, entry_min_speed, entry_max_speed, entry_min_size, entry_max_size, clouds):
+    x = int(entry_x.get())
+    y = int(entry_y.get())
+    width = int(entry_width.get())
+    height = int(entry_height.get())
+    shape = shape_var.get()
 
-    spawn_rate = float(entry_spawn_rate.get())
-    min_speed = float(entry_min_speed.get())
-    max_speed = float(entry_max_speed.get())
-    min_size = float(entry_min_size.get())
-    max_size = float(entry_max_size.get())
-    clouds.append(Cloud(x, y, width, height, drop_params, shape))
+    drop_params = {
+        "spawn_rate": float(entry_spawn_rate.get()),
+        "min_speed": float(entry_min_speed.get()),
+        "max_speed": float(entry_max_speed.get()),
+        "min_size": float(entry_min_size.get()),
+        "max_size": float(entry_max_size.get())
+    }
 
-def create_input_widgets(root):
-    entry_x = tk.Entry(root)
+    clouds.append(Cloud(x, y, width, height, shape, drop_params))
+
+def create_input_widgets(root, frame_left):
+    label_x = tk.Label(frame_left, text="X-coordinate:")
+    label_x.pack()
+    entry_x = tk.Entry(frame_left)
     entry_x.insert(0, "100")
     entry_x.pack()
 
-    entry_y = tk.Entry(root)
+    label_y = tk.Label(frame_left, text="Y-coordinate:")
+    label_y.pack()
+    entry_y = tk.Entry(frame_left)
     entry_y.insert(0, "100")
     entry_y.pack()
 
-    entry_width = tk.Entry(root)
+    label_width = tk.Label(frame_left, text="Width:")
+    label_width.pack()
+    entry_width = tk.Entry(frame_left)
     entry_width.insert(0, "150")
     entry_width.pack()
 
-    entry_height = tk.Entry(root)
+    label_height = tk.Label(frame_left, text="Height:")
+    label_height.pack()
+    entry_height = tk.Entry(frame_left)
     entry_height.insert(0, "100")
     entry_height.pack()
 
+    label_shape = tk.Label(frame_left, text="Shape:")
+    label_shape.pack()
     shape_var = tk.StringVar()
     shape_var.set("rectangle")
     shape_options = ["rectangle", "oval", "pooh"]
-    shape_menu = tk.OptionMenu(root, shape_var, *shape_options)
+    shape_menu = tk.OptionMenu(frame_left, shape_var, *shape_options)
     shape_menu.pack()
 
-    entry_spawn_rate = tk.Entry(root)
+    label_spawn_rate = tk.Label(frame_left, text="Spawn Rate:")
+    label_spawn_rate.pack()
+    entry_spawn_rate = tk.Entry(frame_left)
     entry_spawn_rate.insert(0, "0.99")
     entry_spawn_rate.pack()
 
-    entry_min_speed = tk.Entry(root)
+    label_min_speed = tk.Label(frame_left, text="Min Speed:")
+    label_min_speed.pack()
+    entry_min_speed = tk.Entry(frame_left)
     entry_min_speed.insert(0, "40")
     entry_min_speed.pack()
 
-    entry_max_speed = tk.Entry(root)
-    entry_max_speed.insert(40, "100")
+    label_max_speed = tk.Label(frame_left, text="Max Speed:")
+    label_max_speed.pack()
+    entry_max_speed = tk.Entry(frame_left)
+    entry_max_speed.insert(0, "100")
     entry_max_speed.pack()
 
-    entry_min_size = tk.Entry(root)
+    label_min_size = tk.Label(frame_left, text="Min Size:")
+    label_min_size.pack()
+    entry_min_size = tk.Entry(frame_left)
     entry_min_size.insert(0, "10")
     entry_min_size.pack()
 
-    entry_max_size = tk.Entry(root)
-    entry_max_size.insert(10, "30")
+    label_max_size = tk.Label(frame_left, text="Max Size:")
+    label_max_size.pack()
+    entry_max_size = tk.Entry(frame_left)
+    entry_max_size.insert(0, "30")
     entry_max_size.pack()
-    
-    drop_params = {
-        "spawn_rate" : float(entry_spawn_rate),
-        "min_speed" : float(entry_min_speed),
-        "max_speed" : float(entry_max_speed),
-        "min_size" : float(entry_min_size),
-        "max_size" : float(entry_max_size)
-    }
-    
-    add_cloud_button = tk.Button(root, text="Create Cloud", command=lambda: add_cloud(entry_x, entry_y, entry_width, entry_height, shape_var, drop_params, root))
-    add_cloud_button.pack()
 
-    return entry_x, entry_y, entry_width, entry_height, shape_var, drop_params
+    return entry_x, entry_y, entry_width, entry_height, shape_var, entry_spawn_rate, entry_min_speed, entry_max_speed, entry_min_size, entry_max_size
 
-        
 
 def main():
     root = tk.Tk()
@@ -147,18 +168,16 @@ def main():
 
     config = load_config("config.json")
 
-    canvas = tk.Canvas(root, width=config["screen_width"], height=config["screen_height"], bg="gray80")
+    frame_left = tk.Frame(root)
+    frame_left.pack(side="left", padx=10)
+
+    canvas_frame = tk.Frame(root)
+    canvas_frame.pack(side="right", padx=10)
+
+    canvas = tk.Canvas(canvas_frame, width=config["screen_width"], height=config["screen_height"], bg="gray80")
     canvas.pack()
     
     clouds = []
-    
-    default_drop_params = {
-        'spawn_rate': config["spawn_rate"],
-        'min_speed': config["drop_min_speed"],
-        'max_speed': config["drop_max_speed"],
-        'min_size': config["drop_min_size"],
-        'max_size': config["drop_max_size"]
-    }
     
     def update_scene():
         canvas.delete("all")
@@ -166,21 +185,16 @@ def main():
             cloud.generate_drop()
             cloud.update_raindrops(config["screen_width"])
             cloud.draw(canvas)
-        root.after(config['update_interval'], update_raindrops)
+        root.after(config['update_interval'], update_scene)
 
-    
-    add_cloud_button = tk.Button(root, text="Add Cloud", command=add_cloud)
+    entry_x, entry_y, entry_width, entry_height, shape_var, entry_spawn_rate, entry_min_speed, entry_max_speed, entry_min_size, entry_max_size = create_input_widgets(root, frame_left)
+
+    add_cloud_button = tk.Button(frame_left, text="Create Cloud", command=lambda: add_cloud(entry_x, entry_y, entry_width, entry_height, shape_var, entry_spawn_rate, entry_min_speed, entry_max_speed, entry_min_size, entry_max_size, clouds))
     add_cloud_button.pack()
-        
-        
 
-root.mainloop() #нужно запустить один раз чтоб следить за интерактивчиками
+    update_scene()
 
+    root.mainloop()
 
-#self.drop_params = {
-#    "min_speed": drop_min_speed,
-#    "max_speed": drop_max_speed,
-#    "min_size": drop_min_size,
-#    "max_size": drop_max_size,
-#    "spawn_rate": drop_density
-#    }
+if __name__ == "__main__":
+    main()
