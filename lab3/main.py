@@ -13,9 +13,11 @@ class Drop:
         self.speed = speed
         self.size = size
         self.color = color
+        self.deviation = random.randrange(int(-(speed // 3)), int(speed // 3) + 1)
 
     def move(self):
         self.y += self.speed
+        self.x += self.deviation
 
     def draw(self, canvas):
         canvas.create_rectangle(self.x, self.y, self.x + self.size / 5, self.y + self.size, fill=self.color, outline=self.color)
@@ -210,12 +212,12 @@ def main():
 
     min_speed_label = tk.Label(frame_left, text="Min Speed")
     min_speed_label.pack()
-    min_speed_slider = tk.Scale(frame_left, from_=0, to_=40, orient="horizontal", command=on_rain_params_change)
+    min_speed_slider = tk.Scale(frame_left, from_=1, to_=40, orient="horizontal", command=on_rain_params_change)
     min_speed_slider.pack()
 
     max_speed_label = tk.Label(frame_left, text="Max Speed")
     max_speed_label.pack()
-    max_speed_slider = tk.Scale(frame_left, from_=0, to_=120, orient="horizontal", command=on_rain_params_change)
+    max_speed_slider = tk.Scale(frame_left, from_=40, to_=120, orient="horizontal", command=on_rain_params_change)
     max_speed_slider.pack()
 
     min_size_label = tk.Label(frame_left, text="Min Size")
