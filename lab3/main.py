@@ -35,7 +35,6 @@ class Cloud:
         self.drops = []
         self.color = "gray"
         self.selected = False
-        self.generated = False  # Флаг, чтобы капли генерировались только один раз
 
     def draw(self, canvas):
         outline_color = "blue" if self.selected else "black"
@@ -48,19 +47,15 @@ class Cloud:
         elif self.shape == "pooh":
             ball_width = self.width * 0.6
             ball_height = self.height * 0.6
-            canvas.create_oval(self.x - ball_width * 0.5, self.y + self.height * 0.2,
-                               self.x + ball_width * 0.5, self.y + self.height * 0.3 + ball_height,
-                               fill=self.color, outline=outline_color)
-            canvas.create_oval(self.x + self.width - ball_width * 0.5, self.y + self.height * 0.2,
-                               self.x + self.width + ball_width * 0.5, self.y + self.height * 0.3 + ball_height,
-                               fill=self.color, outline=outline_color)
+            canvas.create_oval(self.x - ball_width * 0.5, self.y + self.height * 0.2, self.x + ball_width * 0.5, self.y + self.height * 0.3 + ball_height, fill=self.color, outline=outline_color)
+            canvas.create_oval(self.x + self.width - ball_width * 0.5, self.y + self.height * 0.2, self.x + self.width + ball_width * 0.5, self.y + self.height * 0.3 + ball_height, fill=self.color, outline=outline_color)
             canvas.create_oval(self.x, self.y, self.x + self.width, self.y + self.height, fill=self.color, outline=outline_color)
         
         for drop in self.drops:
             drop.draw(canvas)
 
     def generate_drop(self):
-        if random.random() > self.drop_params.get("spawn_rate", 0.1):  # Используем spawn_rate
+        if random.random() > self.drop_params.get("spawn_rate", 0.1):
             return
             
         def size_to_color(size, min_size, max_size):
@@ -105,7 +100,7 @@ def main():
     drag_start = None
 
     shape_var = tk.StringVar()
-    shape_var.set("rectangle")  # начальное значение
+    shape_var.set("rectangle")
 
     def update_scene():
         canvas.delete("all")
@@ -113,27 +108,24 @@ def main():
             cloud.generate_drop()
             cloud.update_raindrops(config["screen_height"])
             cloud.draw(canvas)
-        root.after(config["update_interval"], update_scene)  # Задержка между обновлениями
+        root.after(config["update_interval"], update_scene)
 
     def on_click(event):
         nonlocal selected_cloud
-        selected_cloud = None  # Сбрасываем выбор перед проверкой
+        selected_cloud = None
         for cloud in clouds:
-            if cloud.is_clicked(event.x, event.y):  # Проверяем, кликнули ли на облако
-                cloud.selected = True  # Отметить облако как выбранное
-                selected_cloud = cloud  # Присваиваем выбранное облако
+            if cloud.is_clicked(event.x, event.y):
+                cloud.selected = True
+                selected_cloud = cloud
             else:
-                cloud.selected = False  # Снять выделение с других облаков
+                cloud.selected = False
         update_controls()
 
     def on_drag(event):
-        if selected_cloud:  # Проверяем, выбран ли объект
+        if selected_cloud:
             dx = event.x - (selected_cloud.x + selected_cloud.width / 2)
             dy = event.y - (selected_cloud.y + selected_cloud.height / 2)
-            selected_cloud.move(dx, dy)  # Перемещаем облако
-            #canvas.delete("all")  # Перерисовываем только облако
-            #for cloud in clouds:
-                #cloud.draw(canvas)  # Перерисовать все облака
+            selected_cloud.move(dx, dy)
 
     def update_controls():
         if selected_cloud:
@@ -190,14 +182,12 @@ def main():
             selected_cloud.drop_params["min_size"] = min_size_slider.get()
             selected_cloud.drop_params["max_size"] = max_size_slider.get()
 
-    # UI Elements
     add_button = tk.Button(frame_left, text="Add Cloud", command=add_cloud_handler)
     add_button.pack(pady=5)
 
     remove_button = tk.Button(frame_left, text="Remove Cloud", command=remove_cloud_handler)
     remove_button.pack(pady=5)
 
-    # Cloud Size
     width_label = tk.Label(frame_left, text="Width")
     width_label.pack()
     width_slider = tk.Scale(frame_left, from_=50, to_=300, orient="horizontal", command=on_slider_change)
@@ -230,7 +220,7 @@ def main():
 
     min_size_label = tk.Label(frame_left, text="Min Size")
     min_size_label.pack()
-    min_size_slider = tk.Scale(frame_left, from_=5, to_=20, orient="horizontal", command=on_rain_params_change)
+    min_size_slider = tk.Scale(frame_left, from_=5, to_=19, orient="horizontal", command=on_rain_params_change)
     min_size_slider.pack()
 
     max_size_label = tk.Label(frame_left, text="Max Size")
